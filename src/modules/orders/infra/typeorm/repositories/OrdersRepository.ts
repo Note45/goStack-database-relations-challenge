@@ -12,17 +12,19 @@ class OrdersRepository implements IOrdersRepository {
   }
 
   public async create({ customer, products }: ICreateOrderDTO): Promise<Order> {
-    return this.ormRepository.create({
+    const order = this.ormRepository.create({
       customer,
       order_products: products,
     });
+
+    await this.ormRepository.save(order);
+
+    return order;
   }
 
   public async findById(id: string): Promise<Order | undefined> {
-    const ordersProducts = this.ormRepository.findOne({
-      where: {
-        id,
-      },
+    const ordersProducts = await this.ormRepository.findOne(id, {
+      relations: ['order_products', 'customer'],
     });
 
     return ordersProducts;
